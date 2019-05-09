@@ -3,14 +3,14 @@
 
 RouteModel::RouteModel(const std::vector<std::byte> &xml) : Model(xml) {
     int i = 0;
-    for(auto node : this->Nodes()){
-        Node* temp = new Node(i++, this, node);
-        mNodes.push_back((*temp));
+    for(Model::Node node : this->Nodes()){
+        mNodes.push_back(Node(i, this, node));
+        i++;
     }
     CreateNodeToRoadHashmap();
 }
-double RouteModel::Node::distance(RouteModel::Node node){
-    return sqrt(pow(node.x - x, 2) + pow(node.y - y, 2));
+float RouteModel::Node::distance(RouteModel::Node node){
+  return std::sqrt(std::pow(node.x - x, 2) + std::pow(node.y - y, 2));
 }
 
 /**
@@ -19,16 +19,19 @@ double RouteModel::Node::distance(RouteModel::Node node){
  * we  map node ids to their respective roads
  */ 
 void RouteModel::CreateNodeToRoadHashmap(){
-    for(auto road : Roads()){
+    for(const Model::Road& road : Roads()){
         if(road.type != Road::Type::Footway){
-            for(auto idx : Ways()[road.way].nodes){
+            for(int idx : Ways()[road.way].nodes){
+              if(node_to_road.find(idx) == node_to_road.end()){
+                node_to_road[idx] = std::vector<const Model::Road* >();
+              }
                 node_to_road[idx].push_back(&road);
             }
         }
     }
 }
 //Returns a map of node to roads
-std::unordered_map<int, std::vector<Model::Road*>> RouteModel::getNodeToRoadHashmap(){
+std::unordered_map<int, std::vector<const Model::Road*>>& RouteModel::GetNodeToRoadHashmap(){
     return node_to_road;
 }
 std::vector<RouteModel::Node>& RouteModel::SNodes(){
@@ -38,35 +41,45 @@ RouteModel::Node* RouteModel::Node::FindNeighbor(std::vector<int> node_indices){
     Node* closest_node = nullptr;
     for(int node_index : node_indices){
         Node node = parent_model->SNodes()[node_index];
-        if(closest_node!= nullptr && !node.visited && distance(node) < distance(*closest_node)){
-            closest_node = &node;
+        if(this->distance(node) != 0 && !node.visited){
+           if(closest_node== nullptr || this->distance(node) < this->distance(*closest_node)){
+              closest_node = &parent_model->SNodes()[node_index];
+           }
         }
+
     }
     return closest_node;
 }
 void RouteModel::Node::FindNeighbors(){
-    for(auto road : parent_model->node_to_road[this->index]){
-        std::vector<int> temp = parent_model->Ways()[road->way].nodes;
-        if(findNeighbor(temp) != NULL){
-            this->neighbors.push_back(findNeighbor(temp));
+    for(auto& road : parent_model->node_to_road[this->index]){
+        std::vector<int> node_indices = parent_model->Ways()[road->way].nodes;
+        RouteModel::Node* new_node = this->FindNeighbor(node_indices);
+        if(new_node){
+            this->neighbors.push_back(new_node);
         }
     }
 }
+/**
+ * We use the FindClosestNode method to get the 
+ * approximately closest node in our list of nodes
+*/
 RouteModel::Node& RouteModel::FindClosestNode(double x, double y){
     Node temp;
     temp.x = x;
     temp.y = y;
-    Node closest_idx;
-    double min_dist = std::numeric_limits<float>::min();
-    for(auto road : Roads()){
+    float min_dist = std::numeric_limits<float>::max();
+    float dist;
+    int closest_idx;
+    for(const auto road : Roads()){
         if(road.type != Road::Type::Footway){
-            for(auto node : Ways()[road.way].nodes){
-                Node close = SNodes()[node];
-                if(temp.distance(close) < min_dist){
-                    closest_idx = close;
+            for(int node_idx : Ways()[road.way].nodes){
+                dist = temp.distance(SNodes()[node_idx]);
+                if(dist < min_dist){
+                    min_dist = dist;
+                    closest_idx = node_idx;
                 }
             }
         }
     }
-    return closest_idx;
+    return SNodes()[closest_idx];
 }

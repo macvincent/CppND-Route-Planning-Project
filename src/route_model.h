@@ -13,7 +13,6 @@ class RouteModel : public Model {
     class Node : public Model::Node {
       public:
         // Add public Node variables and methods here.
-        
         Node(){}
         Node(int idx, RouteModel * search_model, Model::Node node) : Model::Node(node), parent_model(search_model), index(idx) {}
         Node* parent = nullptr;
@@ -21,7 +20,7 @@ class RouteModel : public Model {
         float g_value = 0.0;
         bool visited = false;
         std::vector<Node*> neighbors;
-        double distance (Node);
+        float distance ( Node);
         void FindNeighbors();
       private:
         // Add private Node variables and methods here.
@@ -31,15 +30,15 @@ class RouteModel : public Model {
     };
     
     // Add public RouteModel variables and methods here.
-    RouteModel(const std::vector<std::byte> &xml);  
+    RouteModel(const std::vector<std::byte> &xml);
     std::vector<Node> path; // This variable will eventually store the path that is found by the A* search.
-	  std::vector<Node>& SNodes();
-    std::unordered_map<int, std::vector<Model::Road*>> getNodeToRoadHashmap();
+    std::vector<Node>& SNodes();
+    std::unordered_map<int, std::vector<const Model::Road*>>& GetNodeToRoadHashmap();
     Node& FindClosestNode(double, double);
   private:
     // Add private RouteModel variables and methods here.
-  	std::vector<Node> mNodes;
-    std::unordered_map<int, std::vector< Model::Road*>>node_to_road;
+    std::vector<Node> mNodes;
+    std::unordered_map<int, std::vector<const Model::Road*>>node_to_road;
     void CreateNodeToRoadHashmap();
 };
 

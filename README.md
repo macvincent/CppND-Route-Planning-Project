@@ -1,5 +1,9 @@
 # Route Planning Project Starter Code
 
+<p align="center">
+  <img src = "https://github.com/macvincent/CppND-Route-Planning-Project/blob/master/instructions/map.png">
+</p>
+
 This is the starter code for the Route Planning project. Instructions for each exercise can be found in the `instructions` directory, and unit tests for some exercises in the `test` directory.
 
 ## Cloning
@@ -30,7 +34,6 @@ The executables will be placed in the `bin` directory. From within `build`, you 
 ```
 ../bin/<name-of-parent-directory> -f ../map.osm
 ```
-
 ## Testing
 
 For exercises that have unit tests, the project must be built with the approprate test cpp file. This can be done by passing a string with the `-DTESTING` flag in `cmake`. For example, from the build directory:
@@ -42,7 +45,7 @@ Those commands will build the code with the tests for the "Fill Out Route Model"
 ```
 ../bin/test
 ```
-Exercises with tests will specify which string to pass with `-DTESTING`, but a table is given below with the complete list for reference:
+Exercises with tests will specify which string to pass with `-DTESTING`, but a table is given below with the complete list for reference:1
 
 | Exercise Name               | `-DTESTING` String Value |
 |-----------------------------|:------------------------:|
